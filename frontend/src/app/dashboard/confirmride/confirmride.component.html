@@ -1,0 +1,104 @@
+<div class="container">
+    <div class="filter-section">
+      <select id="filter-dropdown" [(ngModel)]="statusfilter">
+        <option value="-1">Select Status</option>
+        <option [value]="0">Pending</option>
+        <option [value]="1">Assigning</option>
+        <option [value]="4">Accepted</option>
+      </select>
+
+      <select id="filter-dropdown" [(ngModel)]="vehiclefilter" >
+        <option value="">Select a vehicle</option>
+        <option [value]="vehicle" *ngFor="let vehicle of filteredVehicles">{{vehicle}}</option>
+      </select>
+
+      <button (click)="getrideData()">Apply Filter</button>
+      <button (click)="clearFilter()">Clear Filter</button>
+      
+      <input type="text" id="search-input" placeholder="Search by Req. ID, Name, Phone, Pick up Date..." [(ngModel)]="searchText" (input)="getrideData()">
+      <input type="date" id="search-input" [(ngModel)]="searchDate" (input)="getrideData()">
+      <!-- <button id="search-button">Search</button> -->
+      <div class="custom-select" >
+        <select class="m-2" id="pageSize" [(ngModel)]="limit" (change)="onPageSizeChange($event)">
+          <option value="5">Select Page</option>
+          <option value="2">2</option>
+          <option value="5">5</option>
+          <option value="10">10</option>
+          <option value="25">25</option>
+          <option value="50">50</option>
+          <option value="100">100</option>
+        </select>
+      </div>
+
+      <select id="filter-dropdown" [(ngModel)]="sortOrder">
+        <option value="desc">Sorting Order</option>
+        <option value="asc">Ascending</option>
+        <option value="desc">Descending</option>
+      </select>
+    </div>
+  </div>
+
+  
+
+<div class="parentFormContainer">
+    <div id="tableContainer">
+        <div class="table-responsive">
+            <table class="table">
+                <thead class="bg-light text-dark">
+                    <tr>
+                        <th><pre>Req. ID</pre></th>
+                        <th><pre>User ID</pre></th>
+                        <th><pre>Username</pre></th>
+                        <th><pre>Pick up Time</pre></th>
+                        <th><pre>Pick up Address</pre></th>
+                        <th><pre >Drop off Address</pre></th>
+                        <th><pre>Service Type</pre></th>
+                        <th><pre>Status</pre></th>
+                        <th><pre>Assign</pre></th>
+                        <th><pre>Action</pre></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let ride of ridesArray| paginate: { itemsPerPage: limit, currentPage: currentPage, totalItems: count}; let i = index">
+                        
+
+                        <td>{{ ride._id }}</td>
+                        <td>{{ ride.userId }}</td>
+                        <td>{{ ride.userDetails.username }}</td>
+                        <td>{{ ride.rideDate }}</td>
+                        <td class="fixed-width">{{ ride.startLocation }}</td>
+                        <td class="fixed-width">{{ ride.endLocation }}</td>
+                        <td>{{ ride.serviceType }}</td>
+                        <td [ngSwitch]="ride.status">
+                            <span class="statusbadge" *ngSwitchCase="1" [ngClass]="{'badge-info': ride.status === 1}">Assigning</span>
+                            <span class="statusbadge" *ngSwitchCase="4" [ngClass]="{'badge-success': ride.status === 4}">Accepted</span>
+                            <span class="statusbadge" [ngClass]="{'badge-warning': ride.status === 0}" *ngSwitchDefault>Pending</span>
+                            <!-- <span class="statusbadge" [ngClass]="{'badge-warning': [1, 4].indexOf(ride.status) === -1}" *ngSwitchDefault>Pending</span> -->
+                        </td>
+                          
+                        <td>
+                            <button class="btn btn-primary" *ngIf="assignedDriverName">{{ assignedDriverName }}</button>
+                            <button class="btn btn-primary"  (click)="openAssignDriverDialog(ride)" *ngIf="!assignedDriverName">Assign Driver</button>
+                        </td>
+                        <td>
+                            <button [matMenuTriggerFor]="lvl2master" color="accent"
+                                mat-button><mat-icon>edit</mat-icon></button>
+                            <mat-menu #lvl2master="matMenu">
+                                <!-- <button mat-menu-item *ngIf="!assignedDriverName" (click)="openAssignDriverDialog(ride)"><mat-icon>update</mat-icon>Assign Driver</button> -->
+                                <button mat-menu-item (click)="openInfoDialog(ride)"><mat-icon>info</mat-icon>Ride Info</button>
+                                <button mat-menu-item  (click)="cancelride(ride._id)"><mat-icon>delete</mat-icon>Cancel Ride</button>
+                            </mat-menu>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- ---------------------------------------------PAGINATION USING NGX-------------------------------------------- ----- -->
+<div class="d-flex justify-content-center">
+    <pagination-controls  (pageChange)="onPageChange($event)" [maxSize]="5"
+        [responsive]="true"></pagination-controls>
+</div>
+  
